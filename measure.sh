@@ -31,19 +31,19 @@ for ce in 0 1; do
 for rth in 0 1; do
 for  eeo in 0 1; do
 	(
-	echo 'Benchmark,Time,Time_stdev,Freq,Actual_Freq,Cycles,Branches,Insns,E_pkg,E_cores,E_ram,Cycles_stdev,Branches_stdev,Insns_stdev,E_pkg_stdev,E_cores_stdev,E_ram_stdev'
+	echo 'Benchmark,Time,Time_stdev,Epp,Actual_Freq,Cycles,Branches,Insns,E_pkg,E_cores,E_ram,Cycles_stdev,Branches_stdev,Insns_stdev,E_pkg_stdev,E_cores_stdev,E_ram_stdev'
 
 	for epp in `seq 0 8 255` 255; do
 	ensure MSR_POWER_CTL:1=$ce >&2
 	ensure MSR_POWER_CTL:19=$rth >&2
 	ensure MSR_POWER_CTL:20=$eeo >&2
 	ensure IA32_HWP_REQUEST:24-31=$epp >&2
-	for bench in "sleep 2" ./arith ./mem "../firestarter/FIRESTARTER/FIRESTARTER -t5"; do
+	for bench in "sleep 2" ./arith ./fast_arith ./mem ./fast_mem ./rep_mem "../firestarter/FIRESTARTER/FIRESTARTER -t5"; do
 	echo "Bench: $bench" >&2
 	if [[ $bench =~ ^\.\./ ]]; then
-		perf stat -r 10 -a -e cycles,instructions,branches,power/energy-pkg/,power/energy-cores/,power/energy-ram/ -o tmp.csv $bench &
+		perf stat -r 10 -a -e cycles,instructions,branches,power/energy-pkg/,power/energy-cores/,power/energy-ram/ -o tmp.csv $bench &>/dev/null &
 	else
-		perf stat -r 10 -a -e cycles,instructions,branches,power/energy-pkg/,power/energy-cores/,power/energy-ram/ -o tmp.csv ./cora.sh $bench &
+		perf stat -r 10 -a -e cycles,instructions,branches,power/energy-pkg/,power/energy-cores/,power/energy-ram/ -o tmp.csv ./cora.sh $bench &>/dev/null &
 	fi
 	sleep 1
 	AFREQ=$(< /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq)

@@ -11,10 +11,16 @@ _start: ;Mmap memory ...
 	MOV R8,-1	;no fd for anonymous memory
 	MOV R9,0	;offset = 0
 	SYSCALL		;Addr now in RAX
+
+	MOV R10,5	;4 rounds
+_looper:
 	MOV RDI,RAX
 	MOV RCX,(1<<30)
 
 	REP STOSB
+
+	SUB R10,1
+	JNZ _looper
 
 	MOV RAX,0x3C	;exit
 	MOV RDI,0
