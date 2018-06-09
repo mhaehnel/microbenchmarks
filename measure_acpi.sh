@@ -30,7 +30,15 @@ for  eeo in 0 1; do
 	ensure MSR_POWER_CTL:1=$ce >&2
 	ensure MSR_POWER_CTL:19=$rth >&2
 	ensure MSR_POWER_CTL:20=$eeo >&2
+	if [ $freq == 3401000 ]; then
+		ensure IA32_MISC_ENABLE:38=0 >&2
+	else
+		ensure IA32_MISC_ENABLE:38=1 >&2
+	fi
 #	ensure IA32_HWP_REQUEST:24-31=$epp >&2
+	for cpuf in /sys/devices/system/cpu/cpu[0-9]*; do
+		echo $freq >$cpuf/cpufreq/scaling_setspeed
+	done
 	for bench in "sleep 2" ./arith ./fast_arith ./mem ./fast_mem ./rep_mem "../firestarter/FIRESTARTER/FIRESTARTER -t5"; do
 	echo "[$(date +%H:%M:%S:%N)] Bench: $bench" >&2
 	if [[ $bench =~ ^\.\./ ]]; then
